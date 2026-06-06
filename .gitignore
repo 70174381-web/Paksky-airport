@@ -184,3 +184,4 @@ desktop.ini
 dist/
 dist-ssr/
 *.local
+!airport_cpp/airport.exe
