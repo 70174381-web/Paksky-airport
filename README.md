@@ -1,271 +1,104 @@
-# ✈ PakSky — Airport Management System
+# ✈ Airport Management System – Full Stack
 
-A full-stack airport operations and flight booking platform built with a **C++ DSA engine**, **Python FastAPI backend**, and **React + TypeScript frontend**.
-
-![PakSky](https://img.shields.io/badge/PakSky-Airport%20Management-3b9eff?style=for-the-badge&logo=airplane)
-![C++](https://img.shields.io/badge/C++-17-00599C?style=for-the-badge&logo=cplusplus)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python)
-![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi)
-
----
-
-## 🖥️ Screenshots
-
-> Login → Book Flights → Airport Ops Map → Gate Scheduler → Weather Predictor
-
----
-
-## 🏗️ Architecture
+A complete airport operations dashboard that connects a **C++ DSA engine** to a **React + TypeScript** frontend via a **FastAPI Python bridge**.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                  React Frontend (Vite + TS)                  │
-│  LoginPage  │  BookingPortal  │  AirportMap  │  FlightPanel  │
-└──────────────────────┬──────────────────────────────────────┘
-                       │  HTTP (axios) + WebSocket
-┌──────────────────────▼──────────────────────────────────────┐
-│               FastAPI Backend (Python 3.11)                  │
-│  /api/schedule  /api/predict-delay  /api/flights             │
-│  /api/bookings  /api/gate-map       /ws/map                  │
-└──────────────────────┬──────────────────────────────────────┘
-                       │  subprocess stdin/stdout
-┌──────────────────────▼──────────────────────────────────────┐
-│              C++ DSA Engine (airport.exe)                    │
-│  GateScheduler │ DelayPredictor │ AirportDB │ Graph          │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│                                                      │
+│   React Frontend (Vite + TypeScript)                 │
+│   ├─ AirportMap.tsx   – Live Leaflet map + WebSocket │
+│   └─ FlightPanel.tsx  – Scheduler / Weather / Gates  │
+│                  ↑ axios / WebSocket                 │
+│   FastAPI Backend (Python)                           │
+│   ├─ POST /api/schedule        – Gate assignment     │
+│   ├─ POST /api/predict-delay   – Weather delay       │
+│   ├─ GET  /api/gate-map        – Gate status         │
+│   └─ WS   /ws/map              – Live plane coords   │
+│                  ↑ subprocess stdin/stdout           │
+│   C++ Binary (airport_cpp/airport)                   │
+│   ├─ GateScheduler   MinHeap + HashMap + BFS + DP    │
+│   ├─ DelayPredictor  Rule-based + MLP neural net     │
+│   └─ AirportDB       AVL BST + Doubly Linked List    │
+└──────────────────────────────────────────────────────┘
 ```
 
----
+## Quick Start
 
-## ✨ Features
-
-### 🔐 Authentication
-- Login / Sign Up with role-based access (Admin / User)
-- Animated login page with flying planes background
-- Demo accounts included for testing
-
-### ✈ Flight Booking Portal
-- Search flights across **9 Pakistani airports** + 6 international destinations
-- Filter by Domestic / International
-- Dynamic ticket pricing in **PKR** based on route and demand
-- **3 seat classes** — Economy 💺, Business 🛋️, First Class 👑
-- Real-time seat availability per flight
-- Full booking flow — select flight → choose class → passenger details → confirm
-- Booking management — view and cancel bookings
-
-### 📋 Flight Status Board
-- Live departure board for any airport and date
-- Status indicators: ON TIME / DELAYED / BOARDING / DEPARTED
-
-### 🗺️ Live Airport Map
-- Interactive **Leaflet map** centered on Pakistan
-- Real-time plane tracking via **WebSocket** (updates every 1.5s)
-- All 9 Pakistani airports plotted with domestic route lines
-- Planes colored by aircraft class (Heavy/Medium/Light)
-
-### ⬡ Gate Scheduler (C++ DSA)
-- Assigns aircraft to gates using **MinHeap + HashMap + BFS + Dynamic Programming**
-- Minimizes total delay across all flights
-- Supports 5-flight and 10-flight demo sets
-
-### ⛅ Weather Delay Predictor (C++ MLP)
-- Predicts flight delay from wind, visibility, rain, snow
-- Rule-based engine + hand-coded neural network
-- Returns delay breakdown per weather factor
-
-### ⊞ Gate Status Map
-- Visual grid of Terminals A, B, C (9 gates total)
-- Shows occupancy, capacity, and free time per gate
-
----
-
-## 🧠 DSA Concepts Used
-
-| Concept | Purpose | Complexity |
-|---------|---------|------------|
-| Min-Heap Priority Queue | Process flights by arrival order | O(log n) |
-| Hash Map | Gate lookup by ID | O(1) |
-| Adjacency-List Graph | Gate proximity network | O(V+E) |
-| BFS | Nearest available gate search | O(V+E) |
-| Dynamic Programming | Minimize total delay | O(n²) |
-| Greedy Best-Fit | Gate assignment by capacity | O(n log n) |
-| AVL BST | Sorted flight record index | O(log n) |
-| Doubly Linked List | Position log FIFO | O(1) append |
-
----
-
-## 🗂️ Project Structure
-
-```
-airport_fullstack/
-├── airport_cpp/                  # C++ DSA Engine
-│   ├── src/main.cpp
-│   ├── include/
-│   │   ├── types.h
-│   │   ├── gate_scheduler.h     # MinHeap + HashMap + BFS + DP
-│   │   ├── delay_predictor.h    # Rule engine + MLP neural net
-│   │   ├── database.h           # AVL BST + Linked List
-│   │   ├── graph.h
-│   │   ├── hash_map.h
-│   │   └── min_heap.h
-│   ├── airport.exe              # Compiled Windows binary
-│   └── Makefile
-│
-├── airport_app/
-│   ├── backend/
-│   │   ├── main.py              # FastAPI server (all endpoints)
-│   │   └── requirements.txt
-│   │
-│   └── frontend/
-│       ├── src/
-│       │   ├── main.tsx
-│       │   ├── App.tsx          # Root + navigation + auth gate
-│       │   ├── LoginPage.tsx    # Animated login / signup
-│       │   ├── BookingPortal.tsx # Flight search + booking
-│       │   ├── AirportMap.tsx   # Leaflet map + WebSocket
-│       │   ├── FlightPanel.tsx  # Gate scheduler + weather
-│       │   └── index.css
-│       ├── package.json
-│       └── vite.config.ts
-│
-└── README.md
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Python 3.11
-- Node.js 18+
-- g++ (for recompiling C++ on Linux/Mac)
-
-### 1. Clone the repo
 ```bash
-git clone https://github.com/YOUR_USERNAME/paksky-airport.git
-cd paksky-airport
+# One-command launch (from this directory)
+chmod +x start.sh && ./start.sh
 ```
 
-### 2. Start the Backend
+Then open **http://localhost:5173**
+
+## Manual Setup
+
+### Backend
 ```bash
-cd airport_app/backend
+cd backend
 pip install -r requirements.txt
-python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn main:app --reload --port 8000
 ```
 
-### 3. Start the Frontend
+### Frontend
 ```bash
-cd airport_app/frontend
+cd frontend
 npm install
 npm run dev
 ```
 
-### 4. Open the app
+## Project Structure
+
 ```
-http://localhost:5173
+airport_app/
+├── start.sh                    # One-click launcher
+├── backend/
+│   ├── main.py                 # FastAPI server
+│   └── requirements.txt
+├── frontend/
+│   └── src/
+│       ├── App.tsx
+│       ├── AirportMap.tsx      # Leaflet map + WS
+│       └── FlightPanel.tsx     # Control panel
+└── ../airport_cpp/             # Pre-compiled C++ binary
+    ├── airport                 # The binary
+    ├── src/main.cpp
+    └── include/
+        ├── types.h
+        ├── gate_scheduler.h    # MinHeap + HashMap + BFS + DP
+        ├── delay_predictor.h   # Rule + MLP predictor
+        ├── database.h          # AVL BST + Linked List
+        ├── graph.h
+        ├── hash_map.h
+        └── min_heap.h
 ```
 
-### 5. Demo Login Credentials
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@paksky.pk | admin123 |
-| User | user@paksky.pk | user123 |
+## API Endpoints
 
----
-
-## 🔌 API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/health` | Backend + binary status |
-| GET | `/api/flights` | Search flights (date, origin, destination) |
-| GET | `/api/airports` | All airport data |
-| GET | `/api/airlines` | All airline data |
-| POST | `/api/bookings` | Create a booking |
-| GET | `/api/bookings` | List all bookings |
-| DELETE | `/api/bookings/{id}` | Cancel a booking |
-| POST | `/api/schedule` | Run C++ gate scheduler |
-| GET | `/api/schedule/demo/small` | 5-flight demo |
-| GET | `/api/schedule/demo/large` | 10-flight demo |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/schedule` | Run gate assignment for custom flights |
+| GET | `/api/schedule/demo/small` | 5-flight demo via C++ |
+| GET | `/api/schedule/demo/large` | 10-flight demo via C++ |
 | POST | `/api/predict-delay` | Weather delay prediction |
-| GET | `/api/gate-map` | Gate occupancy status |
-| GET | `/api/map/routes` | Flight route coordinates |
+| GET | `/api/gate-map` | Current gate occupancy |
 | WS | `/ws/map` | Live plane position stream |
-| GET | `/docs` | Swagger UI (interactive API docs) |
+| GET | `/docs` | Interactive Swagger UI |
 
----
+## DSA Concepts (from C++ engine)
 
-## 🛫 Pakistani Airports Covered
+1. **Min-Heap Priority Queue** – flights ordered by arrival time, O(log n) push/pop
+2. **Hash Map** – O(1) gate lookup by ID  
+3. **Adjacency-List Graph** – gate proximity network (3 terminals × 3 gates)
+4. **BFS** – nearest available gate search when greedy fails
+5. **Dynamic Programming** – minimize total delay across all flights O(n)
+6. **Greedy Best-Fit** – gate assignment (smallest sufficient capacity)
+7. **AVL BST** – sorted flight record index, O(log n) search
+8. **Doubly Linked List** – position log FIFO, O(1) append
 
-| Code | Airport | City | Type |
-|------|---------|------|------|
-| KHI | Jinnah International | Karachi | International |
-| LHE | Allama Iqbal International | Lahore | International |
-| ISB | Islamabad International | Islamabad | International |
-| PEW | Bacha Khan International | Peshawar | International |
-| SKT | Sialkot International | Sialkot | International |
-| MUX | Multan International | Multan | International |
-| UET | Quetta International | Quetta | Domestic |
-| LYP | Faisalabad International | Faisalabad | Domestic |
-| GWD | Gwadar International | Gwadar | Domestic |
+## Frontend Features
 
----
-
-## ✈ Airlines Supported
-
-| Code | Airline | Country |
-|------|---------|---------|
-| PK | Pakistan International Airlines | Pakistan |
-| PA | Airblue | Pakistan |
-| ER | Serene Air | Pakistan |
-| EK | Emirates | UAE |
-| QR | Qatar Airways | Qatar |
-| TK | Turkish Airlines | Turkey |
-| SV | Saudi Arabian Airlines | Saudi Arabia |
-| FZ | flydubai | UAE |
-
----
-
-## 🔧 Recompiling the C++ Binary
-
-### Windows (MinGW)
-```bash
-cd airport_cpp
-g++ -std=c++17 -O2 -o airport.exe src/main.cpp -I include
-```
-
-### Linux / Mac
-```bash
-cd airport_cpp
-g++ -std=c++17 -O2 -o airport src/main.cpp -I include
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| UI Framework | React 19 + TypeScript |
-| Build Tool | Vite 8 |
-| Map Library | Leaflet + React-Leaflet |
-| HTTP Client | Axios |
-| Backend | FastAPI (Python 3.11) |
-| WebSocket | Python asyncio + websockets |
-| DSA Engine | C++17 |
-| Fonts | Syne + JetBrains Mono |
-
----
-
-## 📄 License
-
-MIT License — free to use, modify, and distribute.
-
----
-
-<div align="center">
-  Made with ✈ for Pakistan
-  <br/>
-  <strong>KHI · LHE · ISB · PEW · DXB · DOH · LHR</strong>
-</div>
+- **Live Map** – WebSocket-powered plane movement around LAX with custom icons sized by aircraft class
+- **Gate Scheduler** – Send flights to C++ engine, see assignments with terminal color-coding
+- **Weather Predictor** – Sliders feed into C++ MLP+rule engine, returns delay with breakdown
+- **Gate Map** – Visual terminal grid showing occupancy in real time
